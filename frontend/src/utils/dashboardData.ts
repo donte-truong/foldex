@@ -64,5 +64,3 @@ export const dataStream = [
   ['GNOMAD_EXOMES', 'f=0.0000034'],
   ['TRANSCRIPT', 'NM_000546.6'],
 ]
-
-export const viewerTools = ['zoom_in', '3d_rotation', 'layers']

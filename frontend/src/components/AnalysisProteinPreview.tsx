@@ -1,4 +1,4 @@
-import { Button } from './Button'
+import { Mol3DViewer } from './Mol3DViewer'
 
 export function AnalysisProteinPreview() {
   return (
@@ -7,14 +7,13 @@ export function AnalysisProteinPreview() {
         <span>ALPHAFOLD PREVIEW</span>
         <small>FOLD_CONFIDENCE: 92.4%</small>
       </div>
-      <Button className="render-button">RENDER 8K</Button>
-      <div className="analysis-protein-art" aria-hidden="true">
-        <span className="protein-ring ring-one" />
-        <span className="protein-ring ring-two" />
-        <span className="protein-ring ring-three" />
-        <span className="protein-strand strand-one" />
-        <span className="protein-strand strand-two" />
-      </div>
+
+      <Mol3DViewer
+        pdbId="2LZM"
+        defaultScheme="bfactor"
+        label="3D protein structure analysis view"
+        schemeBarClassName="analysis-scheme-bar"
+      />
     </section>
   )
 }

@@ -233,25 +233,7 @@
   grid-column: span 4;
   grid-row: span 4;
   overflow: hidden;
-  background:
-    radial-gradient(
-      circle at 58% 38%,
-      rgba(0, 218, 243, 0.34),
-      transparent 27%
-    ),
-    radial-gradient(
-      circle at 38% 64%,
-      rgba(8, 241, 169, 0.16),
-      transparent 24%
-    ),
-    linear-gradient(145deg, rgba(2, 6, 23, 0.94), rgba(13, 20, 35, 0.7));
-}
-
-.analysis-protein-preview::after {
-  position: absolute;
-  inset: 0;
-  content: "";
-  background: linear-gradient(180deg, transparent, rgba(11, 19, 38, 0.95));
+  background: linear-gradient(145deg, rgba(2, 6, 23, 0.94), rgba(13, 20, 35, 0.7));
 }
 
 .protein-preview-meta {
@@ -262,6 +244,15 @@
   display: flex;
   flex-direction: column;
   gap: 4px;
+  pointer-events: none;
+}
+
+.analysis-scheme-bar {
+  top: auto;
+  right: auto;
+  bottom: 16px;
+  left: 50%;
+  transform: translateX(-50%);
 }
 
 .protein-preview-meta span {
@@ -276,89 +267,6 @@
   font-size: 10px;
   font-weight: 500;
   letter-spacing: 0.05em;
-}
-
-.render-button {
-  position: absolute;
-  right: 16px;
-  bottom: 16px;
-  z-index: 2;
-  border: 0;
-  border-radius: 999px;
-  padding: 10px 16px;
-  color: var(--on-primary);
-  background: var(--primary);
-  box-shadow: 0 0 15px rgba(0, 229, 255, 0.4);
-  font-family: var(--font-heading);
-  font-size: 10px;
-  font-weight: 600;
-  letter-spacing: 0.1em;
-  cursor: pointer;
-}
-
-.analysis-protein-art {
-  position: absolute;
-  inset: 0;
-  opacity: 0.58;
-  filter: grayscale(1) brightness(1.25);
-}
-
-.protein-ring {
-  position: absolute;
-  display: block;
-  border: 2px solid rgba(195, 245, 255, 0.72);
-  border-radius: 50%;
-  filter: drop-shadow(0 0 20px rgba(0, 218, 243, 0.45));
-}
-
-.ring-one {
-  top: 28%;
-  left: 14%;
-  width: 270px;
-  height: 82px;
-  transform: rotate(-32deg);
-}
-
-.ring-two {
-  top: 46%;
-  left: 22%;
-  width: 240px;
-  height: 76px;
-  transform: rotate(24deg);
-}
-
-.ring-three {
-  top: 58%;
-  left: 10%;
-  width: 300px;
-  height: 92px;
-  transform: rotate(-10deg);
-}
-
-.protein-strand {
-  position: absolute;
-  display: block;
-  width: 210px;
-  height: 2px;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    var(--secondary),
-    transparent
-  );
-  box-shadow: 0 0 20px rgba(8, 241, 169, 0.5);
-}
-
-.strand-one {
-  top: 39%;
-  left: 34%;
-  transform: rotate(52deg);
-}
-
-.strand-two {
-  top: 57%;
-  left: 22%;
-  transform: rotate(-38deg);
 }
 
 .diagnostic-panel {

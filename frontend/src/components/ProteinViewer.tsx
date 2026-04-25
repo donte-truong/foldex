@@ -1,24 +1,10 @@
-import { Button } from './Button'
-import { MaterialIcon } from './MaterialIcon'
-import { viewerTools } from '../utils/dashboardData'
+import { Mol3DViewer } from './Mol3DViewer'
 
 export function ProteinViewer() {
   return (
     <div className="protein-viewer">
-      <div className="protein-art" aria-hidden="true">
-        <span className="helix one" />
-        <span className="helix two" />
-        <span className="helix three" />
-        <span className="mutation-node" />
-        <span className="grid-plane" />
-      </div>
-      <div className="viewer-tools">
-        {viewerTools.map((icon) => (
-          <Button aria-label={icon.replaceAll('_', ' ')} key={icon}>
-            <MaterialIcon name={icon} />
-          </Button>
-        ))}
-      </div>
+      <Mol3DViewer pdbId="4HHB" defaultScheme="ss" />
+
       <div className="viewer-status">
         <p>ALPHAFOLD PREDICTION V2.0</p>
         <div>
