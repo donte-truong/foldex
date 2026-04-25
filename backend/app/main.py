@@ -1,3 +1,6 @@
+from dotenv import load_dotenv
+load_dotenv()
+
 from uuid import uuid4
 
 from fastapi import BackgroundTasks, FastAPI, HTTPException
@@ -18,7 +21,13 @@ app = FastAPI(
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "http://localhost:3000", "http://127.0.0.1:5173", "https://foldex-three.vercel.app"],
+    allow_origins=[
+        "http://localhost:5173",
+        "http://localhost:3000",
+        "http://127.0.0.1:5173",
+        "https://foldex-three.vercel.app",
+    ],
+    allow_origin_regex=r"https://.*\.(vercel\.app|onrender\.com)$",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
