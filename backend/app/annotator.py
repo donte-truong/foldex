@@ -116,27 +116,64 @@ def _build_variant_record(gene: str, mutation_text: str) -> dict[str, Any]:
     }
 
 
+_ONE_LETTER_AAS = set("ACDEFGHIKLMNPQRSTVWY")
+_STOP_TOKENS = {"*", "X", "TER"}
+
+_CDNA_RE = re.compile(
+    r"\bc\.[0-9*+\-_]+(?:[ACGT]>[ACGT]|del[ACGT]*|dup[ACGT]*|ins[ACGT]+|delins[ACGT]+)",
+    re.IGNORECASE,
+)
+_PROTEIN_RE = re.compile(
+    r"(?:p\.)?(?P<ref>[A-Za-z]{3}|[A-Za-z])(?P<pos>\d+)(?P<alt>Ter|TER|[A-Za-z]{3}|[A-Za-z*X])(?![A-Za-z0-9])"
+)
+
+
 def _mutation_metadata(mutation_text: str) -> dict[str, Any]:
     metadata: dict[str, Any] = {"submitted": mutation_text}
-    cdna_match = re.search(r"\bc\.([0-9]+[ACGT]>[ACGT])\b", mutation_text, flags=re.IGNORECASE)
-    protein_match = re.search(
-        r"\bp\.([A-Z][a-z]{2})(\d+)([A-Z][a-z]{2}|Ter|\*)\b",
-        mutation_text,
-    )
+    if not mutation_text:
+        return metadata
 
+    cdna_match = _CDNA_RE.search(mutation_text)
     if cdna_match:
-        metadata["cdna_hgvs"] = f"c.{cdna_match.group(1)}"
+        metadata["cdna_hgvs"] = "c." + cdna_match.group(0)[2:]
+
+    protein_match = _PROTEIN_RE.search(mutation_text)
     if protein_match:
-        ref_three, position, alt_three = protein_match.groups()
-        metadata.update(
-            {
-                "protein_hgvs": f"p.{ref_three}{position}{alt_three}",
-                "reference_aa": AA_THREE_TO_ONE.get(ref_three),
-                "alternate_aa": AA_THREE_TO_ONE.get(alt_three),
-                "protein_position": int(position),
-            }
-        )
+        ref_aa = _normalize_aa(protein_match.group("ref"))
+        alt_aa = _normalize_aa(protein_match.group("alt"))
+        position = int(protein_match.group("pos"))
+        if ref_aa and alt_aa:
+            metadata.update(
+                {
+                    "protein_hgvs": f"p.{_canonical_aa_token(ref_aa)}{position}{_canonical_aa_token(alt_aa)}",
+                    "reference_aa": ref_aa,
+                    "alternate_aa": alt_aa,
+                    "protein_position": position,
+                }
+            )
     return metadata
+
+
+def _normalize_aa(token: str) -> str | None:
+    if not token:
+        return None
+    upper = token.upper()
+    if upper in _STOP_TOKENS:
+        return "*"
+    if len(token) == 1:
+        return upper if upper in _ONE_LETTER_AAS else None
+    if len(token) == 3:
+        return AA_THREE_TO_ONE.get(token.title())
+    return None
+
+
+_AA_ONE_TO_THREE = {one: three for three, one in AA_THREE_TO_ONE.items()}
+
+
+def _canonical_aa_token(one_letter: str) -> str:
+    if one_letter == "*":
+        return "Ter"
+    return _AA_ONE_TO_THREE.get(one_letter, one_letter)
 
 
 async def _fetch_uniprot(variant_record: dict[str, Any]) -> dict[str, Any]:
@@ -290,14 +327,21 @@ def _alpha_missense_from_vep(vep: dict[str, Any]) -> dict[str, Any]:
     predictions = []
     for record in vep.get("records") or []:
         for transcript in record.get("transcript_consequences") or []:
-            if "alphamissense_score" in transcript or "alphamissense_prediction" in transcript:
-                predictions.append(
-                    {
-                        "score": transcript.get("alphamissense_score"),
-                        "prediction": transcript.get("alphamissense_prediction"),
-                        "transcript_id": transcript.get("transcript_id"),
-                    }
-                )
+            am = transcript.get("alphamissense")
+            score = transcript.get("alphamissense_score")
+            prediction = transcript.get("alphamissense_prediction")
+            if isinstance(am, dict):
+                score = am.get("am_pathogenicity", score)
+                prediction = am.get("am_class", prediction)
+            if score is None and prediction is None:
+                continue
+            predictions.append(
+                {
+                    "score": score,
+                    "prediction": prediction,
+                    "transcript_id": transcript.get("transcript_id"),
+                }
+            )
     return {
         "status": "ok" if predictions else vep.get("status", "missing"),
         "predictions": predictions,
@@ -355,13 +399,20 @@ def _function_comments(comments: list[dict[str, Any]]) -> list[str]:
 
 
 def _clinvar_record(record: dict[str, Any]) -> dict[str, Any]:
+    classification = (
+        record.get("germline_classification")
+        or record.get("clinical_impact_classification")
+        or record.get("oncogenicity_classification")
+        or record.get("clinical_significance")
+        or {}
+    )
     return {
         "uid": record.get("uid"),
         "title": record.get("title"),
-        "variation_id": record.get("variation_id"),
-        "clinical_significance": record.get("clinical_significance", {}).get("description"),
-        "review_status": record.get("clinical_significance", {}).get("review_status"),
-        "trait_set": record.get("trait_set"),
+        "variation_id": record.get("variation_id") or record.get("accession"),
+        "clinical_significance": classification.get("description"),
+        "review_status": classification.get("review_status"),
+        "trait_set": classification.get("trait_set") or record.get("trait_set"),
         "genes": record.get("genes"),
     }
 

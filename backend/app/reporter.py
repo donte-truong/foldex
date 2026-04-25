@@ -74,17 +74,7 @@ def _structured_evidence(
             "features": features,
             "description": _unknown_variant_description(parsed_variant, features),
         },
-        "similar_variants": [
-            {
-                "name": item.get("name"),
-                "source": item.get("source"),
-                "similarity_score": item.get("similarity_score"),
-                "similarity_reasons": item.get("similarity_reasons"),
-                "clinical_significance": item.get("clinical_significance"),
-                "description": item.get("description"),
-            }
-            for item in similar_variants
-        ],
+        "similar_variants": list(similar_variants),
         "structures": structures,
         "warnings": warnings,
     }
