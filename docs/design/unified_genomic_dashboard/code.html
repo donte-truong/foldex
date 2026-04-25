@@ -1,0 +1,399 @@
+<!DOCTYPE html><html class="dark" lang="en"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>Foldex | Unified Genomic Dashboard</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;family=Inter:wght@300;400;500;600&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "primary-fixed-dim": "#00daf3",
+                        "on-tertiary-fixed": "#0b1d2c",
+                        "tertiary-fixed": "#d3e4f9",
+                        "surface-container-high": "#222a3d",
+                        "inverse-on-surface": "#283044",
+                        "surface-container-highest": "#2d3449",
+                        "on-surface-variant": "#bac9cc",
+                        "on-primary": "#00363d",
+                        "on-background": "#dae2fd",
+                        "primary": "#c3f5ff",
+                        "on-tertiary-container": "#4a5b6b",
+                        "error-container": "#93000a",
+                        "surface-dim": "#0b1326",
+                        "surface": "#0b1326",
+                        "secondary-fixed-dim": "#00e29e",
+                        "tertiary-container": "#c1d2e6",
+                        "inverse-surface": "#dae2fd",
+                        "primary-container": "#00e5ff",
+                        "surface-variant": "#2d3449",
+                        "secondary-fixed": "#46ffb8",
+                        "secondary": "#beffdc",
+                        "on-tertiary": "#213241",
+                        "on-tertiary-fixed-variant": "#384859",
+                        "outline": "#849396",
+                        "surface-tint": "#00daf3",
+                        "secondary-container": "#08f1a9",
+                        "on-secondary-fixed": "#002114",
+                        "tertiary-fixed-dim": "#b7c8dc",
+                        "surface-container": "#171f33",
+                        "on-primary-container": "#00626e",
+                        "inverse-primary": "#006875",
+                        "surface-container-low": "#131b2e",
+                        "on-error": "#690005",
+                        "on-primary-fixed": "#001f24",
+                        "tertiary": "#e0eeff",
+                        "on-secondary": "#003824",
+                        "on-secondary-container": "#006947",
+                        "error": "#ffb4ab",
+                        "on-secondary-fixed-variant": "#005236",
+                        "on-primary-fixed-variant": "#004f58",
+                        "surface-container-lowest": "#060e20",
+                        "on-error-container": "#ffdad6",
+                        "outline-variant": "#3b494c",
+                        "background": "#0b1326",
+                        "surface-bright": "#31394d",
+                        "on-surface": "#dae2fd",
+                        "primary-fixed": "#9cf0ff"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "xs": "4px",
+                        "unit": "4px",
+                        "margin": "32px",
+                        "sm": "8px",
+                        "max_width": "1600px",
+                        "md": "16px",
+                        "lg": "24px",
+                        "xl": "48px",
+                        "gutter": "20px"
+                    },
+                    "fontFamily": {
+                        "body-md": ["Inter"],
+                        "data-mono": ["Inter"],
+                        "headline-md": ["Space Grotesk"],
+                        "display-xl": ["Space Grotesk"],
+                        "label-caps": ["Space Grotesk"],
+                        "headline-lg": ["Space Grotesk"],
+                        "body-sm": ["Inter"],
+                        "body-lg": ["Inter"]
+                    },
+                    "fontSize": {
+                        "body-md": ["16px", {"lineHeight": "1.5", "fontWeight": "400"}],
+                        "data-mono": ["14px", {"lineHeight": "1", "letterSpacing": "0.05em", "fontWeight": "500"}],
+                        "headline-md": ["24px", {"lineHeight": "1.3", "fontWeight": "500"}],
+                        "display-xl": ["48px", {"lineHeight": "1.1", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                        "label-caps": ["12px", {"lineHeight": "1", "letterSpacing": "0.1em", "fontWeight": "600"}],
+                        "headline-lg": ["32px", {"lineHeight": "1.2", "fontWeight": "600"}],
+                        "body-sm": ["14px", {"lineHeight": "1.5", "fontWeight": "400"}],
+                        "body-lg": ["18px", {"lineHeight": "1.6", "fontWeight": "400"}]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body {
+            background-color: #060e20;
+            background-image: radial-gradient(circle at 50% -20%, #004f58 0%, transparent 40%),
+                              radial-gradient(circle at 0% 100%, #002114 0%, transparent 30%);
+            background-attachment: fixed;
+        }
+        .dna-wave {
+            mask-image: linear-gradient(to right, rgba(0,0,0,0) 0%, rgba(0,0,0,1) 50%, rgba(0,0,0,0) 100%);
+            opacity: 0.1;
+        }
+        .glass-panel {
+            background: rgba(11, 19, 38, 0.6);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(0, 218, 243, 0.1);
+        }
+        .scanning-line {
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #00daf3, transparent);
+            width: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+</head>
+<body class="font-body-md text-on-surface">
+<!-- SideNavBar -->
+<aside class="fixed left-0 top-0 h-screen flex flex-col z-40 bg-slate-950/80 backdrop-blur-2xl border-r border-cyan-500/10 w-64">
+<div class="p-lg border-b border-cyan-500/10">
+<h1 class="text-xl font-black text-cyan-400 font-headline-md tracking-widest" style="">FOLDEX</h1>
+<p class="text-[10px] uppercase tracking-[0.3em] text-slate-500 mt-1" style="">Genomic Intelligence</p>
+</div>
+<nav class="flex-1 mt-md">
+<!-- Dashboard Active -->
+<a class="flex items-center gap-4 bg-cyan-400/10 text-cyan-400 border-r-4 border-cyan-400 px-6 py-4 w-full transition-all duration-300 ease-out font-label-caps" href="#" style="">
+<span class="material-symbols-outlined" style="">dashboard</span>
+<span class="" style="">Dashboard</span>
+</a>
+<a class="flex items-center gap-4 text-slate-500 px-6 py-4 w-full hover:bg-cyan-400/5 hover:text-cyan-200 transition-all font-label-caps" href="#" style="">
+<span class="material-symbols-outlined" style="">biotech</span>
+<span class="" style="">Analysis</span>
+</a>
+<a class="flex items-center gap-4 text-slate-500 px-6 py-4 w-full hover:bg-cyan-400/5 hover:text-cyan-200 transition-all font-label-caps" href="#" style="">
+<span class="material-symbols-outlined" style="">analytics</span>
+<span class="" style="">Reports</span>
+</a>
+</nav>
+<div class="p-lg border-t border-cyan-500/10">
+<a class="flex items-center gap-4 text-slate-500 px-6 py-4 w-full hover:bg-cyan-400/5 hover:text-cyan-200 transition-all font-label-caps" href="#" style="">
+<span class="material-symbols-outlined" style="">help</span>
+<span class="" style="">Help</span>
+</a>
+<div class="flex items-center gap-3 mt-md px-4 py-2 rounded-lg bg-surface-container-low border border-outline-variant/30">
+<div class="w-8 h-8 rounded-full bg-primary-container/20 flex items-center justify-center border border-primary-container/40">
+<span class="material-symbols-outlined text-sm text-primary-fixed-dim" style="">science</span>
+</div>
+<div>
+<p class="text-xs font-bold text-cyan-400" style="">SYS_NODE_04</p>
+<p class="text-[10px] text-slate-500" style="">LAB_SYSTEM_V2</p>
+</div>
+</div>
+</div>
+</aside>
+<!-- Main Content Area -->
+<main class="ml-64 min-h-screen p-margin max-w-max_width mx-auto">
+<!-- TopAppBar Context -->
+<header class="flex justify-between items-center mb-xl">
+<div>
+<h2 class="font-headline-lg text-primary-fixed-dim tracking-tight" style="">Gene Variant Dashboard</h2>
+<p class="text-on-surface-variant font-body-sm" style="">Session ID: <span class="font-data-mono text-cyan-400" style="">GS-8829-ALPHA</span></p>
+</div>
+<div class="flex items-center gap-md">
+<div class="bg-surface-container-high px-md py-sm rounded-lg border border-outline-variant/20 flex items-center gap-sm">
+<span class="w-2 h-2 rounded-full bg-secondary-container animate-pulse"></span>
+<span class="text-label-caps text-secondary-fixed" style="">System Online</span>
+</div>
+<button class="bg-primary-container text-on-primary-container font-label-caps px-lg py-sm rounded shadow-[0_0_20px_rgba(0,229,255,0.3)] hover:scale-95 transition-transform" style="">
+                    Sequence Run
+                </button>
+</div>
+</header>
+<!-- Dashboard Grid Layout -->
+<div class="grid grid-cols-12 gap-gutter">
+<!-- Quick Intake & Live Analysis Column -->
+<div class="col-span-12 lg:col-span-4 space-y-gutter">
+<!-- Quick Intake -->
+<section class="glass-panel p-lg rounded-xl relative overflow-hidden group">
+<div class="scanning-line opacity-0 group-hover:opacity-100 transition-opacity"></div>
+<h3 class="font-label-caps text-on-surface-variant mb-md flex items-center gap-2" style="">
+<span class="material-symbols-outlined text-sm" style="">upload_file</span>
+                        Quick Intake
+                    </h3>
+<div class="border-2 border-dashed border-cyan-500/20 rounded-lg p-xl flex flex-col items-center justify-center text-center hover:border-cyan-500/40 transition-colors cursor-pointer bg-surface-container-lowest/50">
+<span class="material-symbols-outlined text-4xl text-cyan-400/50 mb-sm" style="">genetics</span>
+<p class="text-body-sm text-on-surface mb-xs" style="">Drop FASTQ / VCF files</p>
+<p class="text-[10px] text-slate-500 uppercase tracking-widest" style="">Max payload 2.4GB</p>
+</div>
+<div class="mt-md">
+<div class="relative">
+<input class="w-full bg-slate-950/50 border-b border-t-0 border-x-0 border-cyan-500/30 focus:ring-0 focus:border-cyan-400 text-data-mono py-md placeholder:text-slate-600" placeholder="Enter sequence string..." type="text">
+<button class="absolute right-0 top-1/2 -translate-y-1/2 text-cyan-400 hover:text-cyan-200" style="">
+<span class="material-symbols-outlined" style="">send</span>
+</button>
+</div>
+</div>
+</section>
+<!-- Live Analysis Status -->
+<section class="glass-panel p-lg rounded-xl">
+<h3 class="font-label-caps text-on-surface-variant mb-md flex items-center justify-between" style="">
+<span class="flex items-center gap-2" style="">
+<span class="material-symbols-outlined text-sm" style="">settings_heart</span>
+                            Live Analysis
+                        </span>
+<span class="text-secondary-fixed text-[10px]" style="">84% COMPLETED</span>
+</h3>
+<div class="space-y-md">
+<div class="space-y-xs">
+<div class="flex justify-between text-[10px] text-slate-400 font-data-mono">
+<span class="" style="">ALIGNMENT_BWA_MEM</span>
+<span class="" style="">100%</span>
+</div>
+<div class="h-1 bg-surface-container-highest rounded-full overflow-hidden">
+<div class="h-full bg-secondary-fixed-dim w-full shadow-[0_0_8px_#00e29e]"></div>
+</div>
+</div>
+<div class="space-y-xs">
+<div class="flex justify-between text-[10px] text-slate-400 font-data-mono">
+<span class="" style="">VARIANT_CALLING_GATK</span>
+<span class="" style="">72%</span>
+</div>
+<div class="h-1 bg-surface-container-highest rounded-full overflow-hidden">
+<div class="h-full bg-cyan-400 w-[72%] shadow-[0_0_8px_#00daf3]"></div>
+</div>
+</div>
+<div class="space-y-xs">
+<div class="flex justify-between text-[10px] text-slate-400 font-data-mono">
+<span class="" style="">STRUCTURAL_ANNOTATION</span>
+<span class="" style="">Pending</span>
+</div>
+<div class="h-1 bg-surface-container-highest rounded-full overflow-hidden">
+<div class="h-full bg-slate-700 w-[5%]"></div>
+</div>
+</div>
+</div>
+</section>
+<!-- Recent Variants -->
+<section class="glass-panel rounded-xl overflow-hidden">
+<div class="p-lg border-b border-cyan-500/10">
+<h3 class="font-label-caps text-on-surface-variant flex items-center gap-2" style="">
+<span class="material-symbols-outlined text-sm" style="">history</span>
+                            Recent Variants
+                        </h3>
+</div>
+<div class="divide-y divide-cyan-500/5">
+<div class="px-lg py-md flex items-center justify-between hover:bg-cyan-400/5 transition-colors cursor-pointer group">
+<div>
+<p class="text-data-mono text-xs text-primary-fixed-dim" style="">chr17:g.41243532C&gt;T</p>
+<p class="text-[10px] text-slate-500" style="">BRCA1 | Exon 11</p>
+</div>
+<span class="px-2 py-0.5 rounded border border-error text-[10px] text-error bg-error/5 group-hover:bg-error/20" style="">Pathogenic</span>
+</div>
+<div class="px-lg py-md flex items-center justify-between hover:bg-cyan-400/5 transition-colors cursor-pointer group">
+<div>
+<p class="text-data-mono text-xs text-primary-fixed-dim" style="">chr7:g.140453136A&gt;T</p>
+<p class="text-[10px] text-slate-500" style="">BRAF | V600E</p>
+</div>
+<span class="px-2 py-0.5 rounded border border-error text-[10px] text-error bg-error/5 group-hover:bg-error/20" style="">Pathogenic</span>
+</div>
+<div class="px-lg py-md flex items-center justify-between hover:bg-cyan-400/5 transition-colors cursor-pointer group">
+<div>
+<p class="text-data-mono text-xs text-primary-fixed-dim" style="">chr13:g.32914438del</p>
+<p class="text-[10px] text-slate-500" style="">BRCA2 | Frame Shift</p>
+</div>
+<span class="px-2 py-0.5 rounded border border-secondary text-[10px] text-secondary bg-secondary/5 group-hover:bg-secondary/20" style="">Benign</span>
+</div>
+</div>
+</section>
+</div>
+<!-- Primary Report & Model Column -->
+<div class="col-span-12 lg:col-span-8 space-y-gutter">
+<!-- Primary Variant Report Card -->
+<section class="glass-panel rounded-xl relative overflow-hidden h-full flex flex-col">
+<!-- DNA Wave Decoration -->
+<svg class="dna-wave absolute top-0 left-0 w-full h-full pointer-events-none" preserveAspectRatio="none" viewBox="0 0 800 600">
+<path d="M0,300 C150,100 250,500 400,300 C550,100 650,500 800,300" fill="none" stroke="#00daf3" stroke-width="2"></path>
+<path d="M0,320 C150,120 250,520 400,320 C550,120 650,520 800,320" fill="none" stroke="#08f1a9" stroke-width="2"></path>
+</svg>
+<div class="relative z-10 p-xl flex-1 grid grid-cols-1 md:grid-cols-2 gap-xl">
+<!-- Left Side: Metrics & Status -->
+<div class="space-y-xl">
+<div class="space-y-md">
+<div class="inline-flex items-center gap-sm bg-error/10 border border-error/30 text-error px-md py-xs rounded-full">
+<span class="w-2 h-2 rounded-full bg-error animate-ping"></span>
+<span class="font-label-caps text-[10px]" style="">Critical Variant Detected</span>
+</div>
+<h1 class="text-display-xl font-headline-lg text-primary-fixed-dim leading-tight" style="">TP53:c.743G&gt;A</h1>
+<p class="text-on-surface-variant max-w-sm" style="">Missense mutation in DNA-binding domain. Likely compromise of protein structural integrity confirmed by multi-model synthesis.</p>
+</div>
+<!-- High-Density Metrics -->
+<div class="grid grid-cols-2 gap-md">
+<div class="bg-surface-container-high/40 border border-outline-variant/10 p-md rounded-lg">
+<p class="text-[10px] font-label-caps text-slate-500 mb-xs" style="">ALLELE FREQUENCY</p>
+<p class="text-headline-md font-data-mono text-cyan-400" style="">0.0004%</p>
+<p class="text-[10px] text-on-error-container mt-xs font-medium" style="">Rare Clinical Marker</p>
+</div>
+<div class="bg-surface-container-high/40 border border-outline-variant/10 p-md rounded-lg">
+<p class="text-[10px] font-label-caps text-slate-500 mb-xs" style="">CONSERVATION (PHASTCONS)</p>
+<p class="text-headline-md font-data-mono text-secondary-fixed" style="">0.998</p>
+<p class="text-[10px] text-secondary-fixed/60 mt-xs font-medium" style="">Highly Conserved</p>
+</div>
+<div class="bg-surface-container-high/40 border border-outline-variant/10 p-md rounded-lg flex flex-col justify-between">
+<p class="text-[10px] font-label-caps text-slate-500 mb-xs uppercase" style="">Clinvar Rating</p>
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-error text-sm" style="font-variation-settings: &quot;FILL&quot; 1;">emergency</span>
+<p class="text-lg font-bold font-label-caps text-error tracking-tight" style="">PATHOGENIC</p>
+</div>
+</div>
+<div class="bg-surface-container-high/40 border border-outline-variant/10 p-md rounded-lg">
+<p class="text-[10px] font-label-caps text-slate-500 mb-xs" style="">REVEL SCORE</p>
+<p class="text-headline-md font-data-mono text-cyan-400" style="">0.862</p>
+<p class="text-[10px] text-slate-500 mt-xs" style="">Above Threshold (&gt;0.75)</p>
+</div>
+</div>
+<div class="flex gap-md">
+<button class="flex-1 bg-white text-slate-950 font-label-caps py-md rounded-lg flex items-center justify-center gap-2 hover:bg-cyan-100 transition-colors" style="">
+<span class="material-symbols-outlined" style="">description</span>
+                                    Full Clinical Report
+                                </button>
+<button class="px-md border border-outline-variant rounded-lg text-on-surface hover:bg-surface-variant transition-colors" style="">
+<span class="material-symbols-outlined" style="">share</span>
+</button>
+</div>
+</div>
+<!-- Right Side: 3D Visualization Placeholder -->
+<div class="relative min-h-[400px] bg-slate-950/40 rounded-2xl border border-cyan-500/10 overflow-hidden group">
+<div class="absolute inset-0 z-0">
+<img alt="3D rendering of a protein structure with neon highlighted amino acid residues showing a mutation point in bright cyan against a dark laboratory digital background" class="w-full h-full object-cover opacity-60 mix-blend-screen" data-alt="3D scientific visualization of protein folding with highlighted mutation sites in vibrant cyan and magenta glow on a dark grid" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDLaYhOQis8ECxjC7vyW7LWWcqJGQhZd-2y9TLWY7Edm0aXRouosnLNdjGCvgXQIAf2wDPQRV1_KiH8yoB4w0K3tm-87TzDJGJX_i7I3EUKs9QXMYtkeEIEYkqDu6c0a10snViaAaZZBcYfeXfDYCAHtghvzUemCPN8dRIjJro1mgONqVXC3saAMPkrdJz9SQFX1y-8Xu2mqb8QV-5bpvAdYmcrSxcy-_uzP6vZWeoovTz9jjwXp_JipzBAAA7AdIf3l2c7RnPg6yE" style="">
+</div>
+<div class="absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent to-transparent"></div>
+<!-- Overlay Controls -->
+<div class="absolute top-md left-md p-sm glass-panel rounded-lg flex flex-col gap-sm">
+<button class="text-cyan-400 hover:bg-cyan-400/20 p-xs rounded transition-colors" style=""><span class="material-symbols-outlined text-sm" style="">zoom_in</span></button>
+<button class="text-cyan-400 hover:bg-cyan-400/20 p-xs rounded transition-colors" style=""><span class="material-symbols-outlined text-sm" style="">3d_rotation</span></button>
+<button class="text-cyan-400 hover:bg-cyan-400/20 p-xs rounded transition-colors" style=""><span class="material-symbols-outlined text-sm" style="font-variation-settings: &quot;FILL&quot; 1;">layers</span></button>
+</div>
+<div class="absolute bottom-md left-md right-md">
+<div class="glass-panel p-md rounded-lg">
+<p class="text-[10px] font-label-caps text-cyan-400 mb-xs" style="">ALPHAFOLD PREDICTION V2.0</p>
+<div class="flex items-center justify-between">
+<span class="text-body-sm font-data-mono" style="">Confidence pLDDT: 92.4</span>
+<div class="flex gap-1">
+<div class="w-1.5 h-1.5 rounded-full bg-secondary-fixed"></div>
+<div class="w-1.5 h-1.5 rounded-full bg-secondary-fixed"></div>
+<div class="w-1.5 h-1.5 rounded-full bg-secondary-fixed"></div>
+<div class="w-1.5 h-1.5 rounded-full bg-secondary-fixed"></div>
+<div class="w-1.5 h-1.5 rounded-full bg-slate-700"></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Footer Data Stream -->
+<div class="relative z-10 border-t border-cyan-500/10 p-lg bg-slate-950/40">
+<div class="flex items-center gap-xl overflow-x-auto no-scrollbar">
+<div class="flex-shrink-0">
+<p class="text-[10px] text-slate-500 font-label-caps" style="">SIFT_SCORE</p>
+<p class="text-data-mono text-cyan-400" style="">0.01 (Deleterious)</p>
+</div>
+<div class="flex-shrink-0">
+<p class="text-[10px] text-slate-500 font-label-caps" style="">POLYPHEN_2</p>
+<p class="text-data-mono text-cyan-400" style="">0.98 (Prob_Damaging)</p>
+</div>
+<div class="flex-shrink-0">
+<p class="text-[10px] text-slate-500 font-label-caps" style="">GNOMAD_EXOMES</p>
+<p class="text-data-mono text-cyan-400" style="">f=0.0000034</p>
+</div>
+<div class="flex-shrink-0">
+<p class="text-[10px] text-slate-500 font-label-caps" style="">TRANSCRIPT</p>
+<p class="text-data-mono text-cyan-400" style="">NM_000546.6</p>
+</div>
+</div>
+</div>
+</section>
+</div>
+</div>
+</main>
+<!-- Contextual FAB (Hidden as per requirement for non-dashboard, but keeping for active Dashboard context) -->
+<button class="fixed bottom-margin right-margin bg-secondary-container text-on-secondary-container w-14 h-14 rounded-full shadow-[0_0_30px_rgba(8,241,169,0.3)] flex items-center justify-center group hover:scale-110 active:scale-95 transition-all z-50" style="">
+<span class="material-symbols-outlined text-3xl group-hover:rotate-90 transition-transform" style="">biotech</span>
+</button>
+</body></html>
