@@ -20,6 +20,7 @@ Jobs are stored in an in-memory dictionary in `app/jobs.py`, so they reset when 
 - `app/parser.py`: Claude/PDF/text parsing task
 - `app/normalizer.py`: HGVS validation and transcript/genomic normalization task
 - `app/annotator.py`: VEP, AlphaMissense, ClinVar, gnomAD, UniProt task
+- `app/features.py`: structure-derived feature extraction task
 - `app/similarity.py`: known similar variant search and scoring task
 - `app/structures.py`: AlphaFold/wild-type/mutant structure artifact task
 - `app/reporter.py`: Claude report generation task
@@ -32,7 +33,7 @@ Jobs are stored in an in-memory dictionary in `app/jobs.py`, so they reset when 
 cd backend
 python -m venv .venv
 source .venv/bin/activate
-pip install -e ".[dev]"
+pip install -r requirements.txt
 python main.py
 ```
 
