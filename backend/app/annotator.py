@@ -47,7 +47,22 @@ async def annotate_variant(variant: dict[str, Any]) -> dict[str, Any]:
     gene = str(variant.get("gene") or "").strip().upper()
     mutation_text = str(variant.get("mutation") or "").strip()
     warnings = []
+
+    # Attempt to use AI to clean up the input if it looks like raw text
+    if gene and not mutation_text or len(gene + mutation_text) > 30:
+        ai_parsed = await _parse_variant_with_ai(gene + " " + mutation_text)
+        if ai_parsed.get("gene"):
+            gene = ai_parsed["gene"]
+            mutation_text = ai_parsed.get("mutation", mutation_text)
+
     variant_record = _build_variant_record(gene, mutation_text)
+
+    # Find the canonical transcript to make VEP/gnomAD/AlphaMissense calls much more reliable
+    transcript_id = await _fetch_ensembl_transcript(gene)
+    if transcript_id:
+        variant_record["ensembl_transcript"] = transcript_id
+    else:
+        warnings.append(f"Could not find a canonical Ensembl transcript for gene {gene}.")
 
     uniprot = await _fetch_uniprot(variant_record)
     warnings.extend(uniprot.pop("warnings", []))
@@ -69,12 +84,19 @@ async def annotate_variant(variant: dict[str, Any]) -> dict[str, Any]:
             "mutation": mutation,
         }
     )
-    features = await variant_features(unknown_structure)
-
     vep = await _fetch_vep(variant_record)
     clinvar = await _fetch_clinvar(variant_record)
     gnomad = await _fetch_gnomad(variant_record, vep)
     alpha_missense = _alpha_missense_from_vep(vep)
+
+    # Calculate features using both the 3D structure and the gathered genomic evidence
+    features = await variant_features(unknown_structure, {
+        "vep": vep,
+        "clinvar": clinvar,
+        "gnomad": gnomad,
+        "uniprot": uniprot,
+        "alpha_missense": alpha_missense
+    })
 
     for block in (vep, clinvar, gnomad):
         warnings.extend(block.get("warnings", []))
@@ -193,11 +215,24 @@ async def _fetch_vep(variant_record: dict[str, Any]) -> dict[str, Any]:
             "records": [],
             "warnings": ["Live APIs are disabled by FOLDEX_DISABLE_LIVE_APIS=1."],
         }
+    
+    # Try the specific HGVS first
     url = f"https://rest.ensembl.org/vep/human/hgvs/{hgvs}"
     try:
         data = await _get_json(url, params={"AlphaMissense": "1"}, headers={"Content-Type": "application/json"})
         return {"status": "ok", "query": hgvs, "records": data, "warnings": []}
-    except Exception as exc:  # noqa: BLE001
+    except Exception as exc:
+        # If it failed and we have a gene symbol, try a broader search as fallback
+        gene = variant_record.get("gene")
+        if gene and ":" in hgvs and not hgvs.startswith(gene):
+             # Try GENE:p.Mutation format if TRANSCRIPT:p.Mutation failed
+             fallback_hgvs = f"{gene}:{hgvs.split(':')[-1]}"
+             try:
+                 url = f"https://rest.ensembl.org/vep/human/hgvs/{fallback_hgvs}"
+                 data = await _get_json(url, params={"AlphaMissense": "1"}, headers={"Content-Type": "application/json"})
+                 return {"status": "ok", "query": fallback_hgvs, "records": data, "warnings": ["Primary transcript VEP failed; used gene-symbol fallback."]}
+             except Exception:
+                 pass
         return {"status": "error", "query": hgvs, "records": [], "warnings": [f"VEP failed: {exc}"]}
 
 
@@ -238,7 +273,7 @@ async def _fetch_gnomad(variant_record: dict[str, Any], vep: dict[str, Any]) -> 
     frequencies = _population_frequencies_from_vep(vep)
     if frequencies:
         return {
-            "status": "from_vep_colocated_variants",
+            "status": "ok",
             "source": "Ensembl VEP colocated variants",
             "population_frequency": frequencies[0],
             "all_frequencies": frequencies,
@@ -246,11 +281,12 @@ async def _fetch_gnomad(variant_record: dict[str, Any], vep: dict[str, Any]) -> 
         }
 
     return {
-        "status": "not_implemented",
-        "source": "gnomAD",
+        "status": "not_found",
+        "source": "gnomAD (via VEP)",
         "population_frequency": None,
         "warnings": [
-            "gnomAD lookup needs genomic coordinates or rsID; current MVP records the placeholder explicitly."
+            "No known population frequency was found in Ensembl VEP records for this variant. "
+            "This often means the variant is extremely rare or novel."
         ],
     }
 
@@ -261,6 +297,9 @@ def _population_frequencies_from_vep(vep: dict[str, Any]) -> list[dict[str, Any]
         "gnomad_af",
         "gnomade_af",
         "gnomadg_af",
+        "gnomad",
+        "gnomade",
+        "gnomadg",
         "af",
         "afr_af",
         "amr_af",
@@ -270,19 +309,27 @@ def _population_frequencies_from_vep(vep: dict[str, Any]) -> list[dict[str, Any]
     }
     for record in vep.get("records") or []:
         for colocated in record.get("colocated_variants") or []:
-            found = {
-                key: colocated.get(key)
-                for key in frequency_keys
-                if colocated.get(key) is not None
-            }
-            if found:
-                frequencies.append(
-                    {
-                        "variant_id": colocated.get("id"),
-                        "source": "VEP colocated variant",
-                        "frequencies": found,
-                    }
-                )
+            # Frequencies are often nested by allele, e.g. {"A": {"gnomad": 0.001}}
+            freq_dict = colocated.get("frequencies") or {}
+            for allele, allele_freqs in freq_dict.items():
+                found = {
+                    key: allele_freqs.get(key)
+                    for key in frequency_keys
+                    if allele_freqs.get(key) is not None
+                }
+                if found:
+                    # Map 'gnomadg' or 'gnomade' to 'gnomad_af' if the latter is missing
+                    if "gnomad_af" not in found:
+                        found["gnomad_af"] = found.get("gnomadg") or found.get("gnomade") or found.get("af")
+
+                    frequencies.append(
+                        {
+                            "variant_id": colocated.get("id"),
+                            "allele": allele,
+                            "source": "VEP colocated variant",
+                            "frequencies": found,
+                        }
+                    )
     return frequencies
 
 
@@ -313,10 +360,17 @@ async def _get_json(url: str, **kwargs: Any) -> Any:
 
 def _hgvs_query(variant_record: dict[str, Any]) -> str | None:
     gene = variant_record.get("gene")
+    transcript = variant_record.get("ensembl_transcript")
     mutation = variant_record.get("mutation") or {}
+    
+    # Prioritize Transcript ID for more reliable VEP/AlphaMissense results
+    target = transcript or gene
+    if not target:
+        return None
+
     for key in ("cdna_hgvs", "protein_hgvs"):
-        if gene and mutation.get(key):
-            return f"{gene}:{mutation[key]}"
+        if mutation.get(key):
+            return f"{target}:{mutation[key]}"
     return None
 
 
@@ -364,6 +418,60 @@ def _clinvar_record(record: dict[str, Any]) -> dict[str, Any]:
         "trait_set": record.get("trait_set"),
         "genes": record.get("genes"),
     }
+
+
+async def _fetch_ensembl_transcript(gene: str) -> str | None:
+    if not gene or not _live_apis_enabled():
+        return None
+    url = f"https://rest.ensembl.org/lookup/symbol/homo_sapiens/{gene}"
+    try:
+        data = await _get_json(url, params={"expand": "1"}, headers={"Content-Type": "application/json"})
+        return data.get("canonical_transcript", "").split(".")[0] or None
+    except Exception:
+        return None
+
+
+async def _parse_variant_with_ai(text: str) -> dict[str, Any]:
+    """Use an LLM to extract gene and mutation from unstructured text or lab reports."""
+    api_key = os.getenv("ANTHROPIC_API_KEY") or os.getenv("GROQ_API_KEY")
+    if not api_key or not _live_apis_enabled():
+        return {}
+
+    prompt = (
+        "Extract the gene symbol and the mutation/variant (e.g. p.V600E or c.1799T>A) from the following text. "
+        "Return ONLY a JSON object with keys 'gene' and 'mutation'. If you cannot find them, return empty strings.\n\n"
+        f"Text: {text}"
+    )
+
+    try:
+        if os.getenv("ANTHROPIC_API_KEY"):
+            import anthropic
+            client = anthropic.AsyncAnthropic(api_key=api_key)
+            message = await client.messages.create(
+                model=os.getenv("FOLDEX_CLAUDE_MODEL", "claude-3-5-sonnet-latest"),
+                max_tokens=100,
+                messages=[{"role": "user", "content": prompt}]
+            )
+            raw = "".join(block.text for block in message.content if hasattr(block, "text"))
+        else:
+            # Fallback to Groq
+            url = "https://api.groq.com/openai/v1/chat/completions"
+            async with httpx.AsyncClient(timeout=10) as client:
+                response = await client.post(
+                    url,
+                    headers={"Authorization": f"Bearer {api_key}"},
+                    json={
+                        "model": os.getenv("FOLDEX_GROQ_MODEL", "llama-3.3-70b-versatile"),
+                        "messages": [{"role": "user", "content": prompt}],
+                        "response_format": {"type": "json_object"}
+                    }
+                )
+                data = response.json()
+                raw = data["choices"][0]["message"]["content"]
+        
+        return json.loads(raw)
+    except Exception:
+        return {}
 
 
 def _live_apis_enabled() -> bool:
