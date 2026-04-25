@@ -18,7 +18,7 @@ async def generate_report(
     - Return markdown plus structured JSON for frontend rendering.
     """
     evidence = _structured_evidence(variant, annotations, similar_variants, structures)
-    ai_markdown = await _claude_report(evidence) or await _ollama_report(evidence)
+    ai_markdown = await _claude_report(evidence) or await _grok_report(evidence)
     markdown = ai_markdown or _fallback_markdown(evidence)
 
     return {
@@ -122,12 +122,13 @@ async def _claude_report(evidence: dict[str, Any]) -> str | None:
         return None
 
 
-async def _ollama_report(evidence: dict[str, Any]) -> str | None:
-    model = os.getenv("FOLDEX_OLLAMA_MODEL")
-    if not model:
+async def _grok_report(evidence: dict[str, Any]) -> str | None:
+    api_key = os.getenv("XAI_API_KEY")
+    if not api_key:
         return None
 
-    url = os.getenv("FOLDEX_OLLAMA_URL", "http://localhost:11434/api/generate")
+    url = os.getenv("FOLDEX_GROK_URL", "https://api.x.ai/v1/chat/completions")
+    model = os.getenv("FOLDEX_GROK_MODEL", "grok-4-latest")
     prompt = (
         "Generate a concise variant research report in markdown using only the structured "
         "evidence below. Do not invent symptoms, diagnoses, population frequencies, "
@@ -141,16 +142,22 @@ async def _ollama_report(evidence: dict[str, Any]) -> str | None:
         async with httpx.AsyncClient(timeout=120) as client:
             response = await client.post(
                 url,
+                headers={
+                    "Authorization": f"Bearer {api_key}",
+                    "Content-Type": "application/json",
+                },
                 json={
                     "model": model,
-                    "prompt": prompt,
-                    "stream": False,
-                    "options": {"temperature": 0},
+                    "temperature": 0,
+                    "messages": [{"role": "user", "content": prompt}],
                 },
             )
             response.raise_for_status()
             data = response.json()
-            return data.get("response")
+            choices = data.get("choices") or []
+            if not choices:
+                return None
+            return choices[0].get("message", {}).get("content")
     except Exception:
         return None
 

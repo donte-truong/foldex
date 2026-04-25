@@ -11,17 +11,13 @@ type $3DmolViewer = {
 export type ColorScheme = 'ss' | 'spectrum' | 'bfactor' | 'residue'
 
 const STYLE_MAP: Record<ColorScheme, object> = {
-  // Secondary structure: PyMOL-style (red helices, yellow sheets, white loops)
   ss: { cartoon: { colorscheme: 'ssPyMol' } },
-  // N→C terminus rainbow
   spectrum: { cartoon: { color: 'spectrum' } },
-  // B-factor: blue (rigid) → white → red (flexible)
   bfactor: {
     cartoon: {
       colorscheme: { prop: 'b', gradient: 'rwb', min: 0, max: 100 },
     },
   },
-  // Amino acid chemical properties (Jmol scheme)
   residue: { cartoon: { colorscheme: 'amino' } },
 }
 
@@ -36,8 +32,10 @@ export function use3DmolViewer(pdbId = '4HHB', colorScheme: ColorScheme = 'ss') 
   const containerRef = useRef<HTMLDivElement>(null)
   const viewerRef = useRef<$3DmolViewer | null>(null)
   const loadedRef = useRef(false)
+  // Always current so init() applies the right scheme even if it changed during fetch
+  const colorSchemeRef = useRef(colorScheme)
+  colorSchemeRef.current = colorScheme
 
-  // Initialize viewer + load model once
   useEffect(() => {
     if (!containerRef.current) return
 
@@ -61,7 +59,7 @@ export function use3DmolViewer(pdbId = '4HHB', colorScheme: ColorScheme = 'ss') 
 
       viewer.removeAllModels()
       viewer.addModel(pdbData, 'pdb')
-      viewer.setStyle({}, STYLE_MAP[colorScheme])
+      viewer.setStyle({}, STYLE_MAP[colorSchemeRef.current])
       viewer.zoomTo()
       viewer.render()
       loadedRef.current = true
@@ -73,11 +71,12 @@ export function use3DmolViewer(pdbId = '4HHB', colorScheme: ColorScheme = 'ss') 
       cancelled = true
       loadedRef.current = false
       viewerRef.current = null
+      // Remove the canvas 3Dmol appended so a re-mount starts with a clean container
+      containerRef.current?.querySelectorAll('canvas').forEach((c) => c.remove())
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pdbId])
 
-  // Re-apply style without re-fetching when colorScheme changes
   useEffect(() => {
     const viewer = viewerRef.current
     if (!viewer || !loadedRef.current) return
