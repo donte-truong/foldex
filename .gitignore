@@ -9,3 +9,4 @@ venv/
 backend/.env
 
 .codex
+.vercel
