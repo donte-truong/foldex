@@ -79,6 +79,7 @@ A user submits a single gene variant either as text (e.g. `BRCA1 c.5096G>A p.Arg
 
 ---
 <img width="3020" height="1578" alt="image" src="https://github.com/user-attachments/assets/3f55319e-9e0f-4bc5-a20e-e33299e5b573" />
+
 ---
 
 ## Architecture
@@ -314,6 +315,7 @@ Claude appears at three points in the pipeline. In each, it acts as a **reasoner
 
 ---
 <img width="3015" height="1585" alt="image" src="https://github.com/user-attachments/assets/c555a51e-628e-4f7f-88b1-092102ff58bc" />
+
 ---
 
 ## Roadmap
