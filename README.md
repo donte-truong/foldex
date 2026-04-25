@@ -14,13 +14,13 @@
 &nbsp;
 ![FastAPI](https://img.shields.io/badge/FastAPI-009688?style=for-the-badge&logo=fastapi&logoColor=white)
 ![Python 3.11+](https://img.shields.io/badge/Python_3.11+-3776AB?style=for-the-badge&logo=python&logoColor=white)
-![Redis](https://img.shields.io/badge/Redis-DC382D?style=for-the-badge&logo=redis&logoColor=white)
 ![RQ](https://img.shields.io/badge/RQ_Workers-A41E11?style=for-the-badge&logoColor=white)
 ![Docker](https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white)
 
 **LLM**
 &nbsp;
 ![Claude](https://img.shields.io/badge/Claude_API-D97757?style=for-the-badge&logo=anthropic&logoColor=white)
+![Groq](https://img.shields.io/badge/Groq-F55036?style=for-the-badge&logoColor=white)
 
 **Bioinformatics**
 &nbsp;
@@ -131,8 +131,8 @@ flowchart LR
 | Frontend | [Vite](https://vitejs.dev), [React](https://react.dev), [TypeScript](https://www.typescriptlang.org), [TailwindCSS](https://tailwindcss.com) | UI, routing, state, streaming job updates |
 | 3D viewer | [Mol\*](https://molstar.org) (with [3Dmol.js](https://3dmol.csb.pitt.edu) as fallback) | Interactive WT vs. mutant rendering |
 | Backend | [FastAPI](https://fastapi.tiangolo.com), Python 3.11+ | REST API, pipeline orchestration |
-| Job queue | [Redis](https://redis.io) + [RQ](https://python-rq.org) | Async work for slow structure-prediction steps |
-| LLM | [Claude API (Anthropic)](https://www.anthropic.com) | Parsing, similarity reasoning, report drafting |
+| Job queue | [RQ](https://python-rq.org) | Async work for slow structure-prediction steps |
+| LLM | [Claude API (Anthropic)](https://www.anthropic.com), [Groq](https://groq.com) | Parsing, similarity reasoning, report drafting |
 | Structure prediction | [AlphaFold DB API](https://alphafold.ebi.ac.uk), [ESMFold API](https://esmatlas.com) | Wild-type and mutant 3D models |
 | Annotation APIs | [Ensembl VEP REST](https://rest.ensembl.org), [ClinVar](https://www.ncbi.nlm.nih.gov/clinvar), [gnomAD GraphQL](https://gnomad.broadinstitute.org/api), [UniProt REST](https://www.uniprot.org) | Functional, clinical, population, and protein evidence |
 | Bioinformatics libs | [Biopython](https://biopython.org), [VariantValidator](https://variantvalidator.org) | Sequence handling, HGVS validation |
@@ -179,7 +179,6 @@ foldex/
 
 - Python 3.11+
 - Node 20+
-- Redis (or use docker-compose, which provides it)
 - An Anthropic API key
 
 ### Environment
@@ -188,7 +187,6 @@ Create a `.env` in the project root:
 
 ```env
 ANTHROPIC_API_KEY=sk-ant-...
-REDIS_URL=redis://localhost:6379
 ENSEMBL_VEP_URL=https://rest.ensembl.org
 GNOMAD_GRAPHQL_URL=https://gnomad.broadinstitute.org/api
 ALPHAFOLD_API_URL=https://alphafold.ebi.ac.uk/api
@@ -328,7 +326,10 @@ Claude appears at three points in the pipeline. In each, it acts as a **reasoner
 
 ## Team
 
-[TODO: add team members]
+- Jayden Lim
+- Colin Park
+- Donte Truong
+- Ricky Ye
 
 ---
 
