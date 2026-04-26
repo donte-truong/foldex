@@ -1,4 +1,8 @@
 # 🧬 FoldEx
+### 🏆 Winner for the Cornell Claude Builder Club Social Impact Hackathon
+**Spring 2026 Biology & Physical Health track**, inspired by Dario Amodei's *Machines of Loving Grace*.
+
+---
 
 > From "we found a mutation, but we don't know what it means" to a structured, source-cited research report — in minutes instead of weeks.
 
@@ -34,8 +38,6 @@
 ![Biopython](https://img.shields.io/badge/Biopython-336691?style=for-the-badge&logoColor=white)
 
 > ⚠️ **FoldEx is not a diagnostic device.** It is a research-support tool. Every output must be reviewed by a qualified clinician or geneticist. FoldEx does not provide medical advice, diagnosis, or treatment guidance.
-
-🏆 Built for the **Claude Builder Club Social Impact hackathon — Biology & Physical Health track**, inspired by Dario Amodei's *Machines of Loving Grace*.
 
 ---
 
